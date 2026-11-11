@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller Interactivo de Ajedrez | Maestría y Estrategia</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cinzel (Serif elegante para ajedrez) e Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        chess: {
+                            dark: '#0a0c10',
+                            card: '#121620',
+                            boardDark: '#1a202c',
+                            boardLight: '#2d3748',
+                            gold: '#d4af37',
+                            goldLight: '#f3e5ab',
+                            goldDark: '#aa7c11',
+                            ivory: '#f8f6f0',
+                            wood: '#2b1b17'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Fondo con patrón sutil de ajedrez / rejilla */
+        .chess-bg-pattern {
+            background-color: #0a0c10;
+            background-image: 
+                linear-gradient(to right, rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, rgba(20, 25, 38, 0.8) 0%, #0a0c10 100%);
+            background-size: 60px 60px, 60px 60px, 100% 100%;
+        }
+
+        /* Gradiente de Texto Dorado */
+        .text-gold-gradient {
+            background: linear-gradient(135deg, #fff3d1 0%, #d4af37 50%, #aa7c11 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Efecto de borde con brillo dorado */
+        .gold-border-glow {
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .gold-border-glow:hover {
+            border-color: rgba(212, 175, 55, 0.7);
+            box-shadow: 0 10px 30px -10px rgba(212, 175, 55, 0.25);
+            transform: translateY(-4px);
+        }
+
+        /* Botón de Acción Principal (CTA) Animado */
+        .cta-btn-gold {
+            position: relative;
+            background: linear-gradient(135deg, #d4af37 0%, #b8860b 50%, #8b6508 100%);
+            background-size: 200% 200%;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+        }
+        .cta-btn-gold:hover {
+            background-position: right center;
+            box-shadow: 0 6px 35px rgba(212, 175, 55, 0.6);
+            transform: scale(1.03);
+        }
+        .cta-btn-gold::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.6s;
+        }
+        .cta-btn-gold:hover::before {
+            left: 100%;
+        }
+
+        /* Piezas de ajedrez flotantes animadas */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(3deg); }
+        }
+        @keyframes floatReverse {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(12px) rotate(-3deg); }
+        }
+        .animate-float-1 { animation: floatSlow 7s ease-in-out infinite; }
+        .animate-float-2 { animation: floatReverse 8s ease-in-out infinite; }
+        .animate-float-3 { animation: floatSlow 9s ease-in-out infinite 1s; }
+
+        /* Estilo personalizado de la barra de desplazamiento */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0c10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2d37;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+    </style>
+</head>
+<body class="chess-bg-pattern font-sans text-chess-ivory min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-chess-gold selection:text-black">
+
+    <!-- Piezas de Ajedrez Ambientales Decorativas en el Fondo -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-10">
+        <span class="absolute top-[12%] left-[5%] text-8xl md:text-9xl text-chess-gold animate-float-1 select-none">♚</span>
+        <span class="absolute top-[55%] right-[4%] text-8xl md:text-9xl text-chess-gold animate-float-2 select-none">♛</span>
+        <span class="absolute bottom-[10%] left-[8%] text-7xl md:text-8xl text-chess-gold animate-float-3 select-none">♞</span>
+        <span class="absolute top-[20%] right-[12%] text-7xl md:text-8xl text-chess-gold animate-float-1 select-none">♜</span>
+    </div>
+
+    <!-- ENCABEZADO / NAVBAR -->
+    <header class="relative z-20 backdrop-blur-md bg-chess-dark/80 border-b border-chess-gold/15 sticky top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo e Identidad -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 rounded-lg bg-gradient-to-br from-chess-gold to-chess-goldDark flex items-center justify-center text-chess-dark text-2xl font-bold shadow-lg shadow-chess-gold/20 group-hover:scale-105 transition-transform duration-300">
+                    ♚
+                </div>
+                <div>
+                    <span class="font-serif font-bold text-lg sm:text-xl tracking-wider text-chess-ivory group-hover:text-chess-gold transition-colors block leading-tight">
+                        TALLER DE AJEDREZ
+                    </span>
+                    <span class="text-[10px] tracking-[0.2em] text-chess-gold/80 uppercase font-semibold">
+                        Maestría e Interacción
+                    </span>
+                </div>
+            </a>
+
+            <!-- Navegación Desktop -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="#caracteristicas" class="text-gray-300 hover:text-chess-gold transition-colors duration-200">Módulos</a>
+                <a href="#filosofia" class="text-gray-300 hover:text-chess-gold transition-colors duration-200">Metodología</a>
+                <a href="#beneficios" class="text-gray-300 hover:text-chess-gold transition-colors duration-200">Beneficios</a>
+            </nav>
+
+            <!-- Acceso Directo al Taller -->
+            <div>
+                <a href="taller_interactivo_ajedrez.html" 
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold tracking-wider text-chess-dark cta-btn-gold uppercase">
+                    <span>Acceder Ahora</span>
+                    <i class="fa-solid font-black fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 flex-grow">
+
+        <!-- SECCIÓN HERO -->
+        <section class="relative pt-12 md:pt-24 pb-16 md:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+            
+            <!-- Badge decorativo -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-chess-gold/10 border border-chess-gold/30 text-chess-gold text-xs sm:text-sm font-medium mb-8 backdrop-blur-sm animate-pulse">
+                <span class="text-base">♟</span>
+                <span>Plataforma Interactiva de Aprendizaje Táctico</span>
+            </div>
+
+            <!-- Título Principal -->
+            <h1 class="font-serif text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-chess-ivory mb-6 leading-[1.15]">
+                Domina el Arte de la <br class="hidden sm:inline" />
+                <span class="text-gold-gradient">Estrategia en el Tablero</span>
+            </h1>
+
+            <!-- Descripción Hero -->
+            <p class="max-w-3xl mx-auto text-base sm:text-lg md:text-xl text-gray-300 font-light mb-10 leading-relaxed">
+                Eleva tu nivel de juego con nuestro <strong class="text-chess-gold font-medium">Taller Interactivo</strong>. 
+                Agudiza tu visión táctica, perfecciona tus aperturas y conquista los finales con lecciones visuales y desafíos prácticos paso a paso.
+            </p>
+
+            <!-- Botón Principal Prominente (CTA) -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                <a href="taller_interactivo_ajedrez.html" 
+                   class="w-full sm:w-auto px-8 py-4 rounded-xl font-serif text-base sm:text-lg font-bold text-chess-dark cta-btn-gold uppercase tracking-wider flex items-center justify-center gap-3 group">
+                    <span class="text-xl">♛</span>
+                    <span>Entrar al Taller Interactivo</span>
+                    <i class="fa-solid fa-chevron-right text-sm group-hover:translate-x-1 transition-transform"></i>
+                </a>
+                
+                <a href="#caracteristicas" 
+                   class="w-full sm:w-auto px-8 py-4 rounded-xl font-serif text-base text-chess-ivory border border-chess-gold/30 hover:border-chess-gold/80 hover:bg-chess-gold/5 transition-all duration-300 flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-compass"></i>
+                    <span>Explorar Temario</span>
+                </a>
+            </div>
+
+            <!-- Mini estadísticas o distintivos -->
+            <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-10 border-t border-chess-gold/15">
+                <div class="p-3">
+                    <p class="font-serif text-2xl sm:text-3xl font-bold text-chess-gold">100%</p>
+                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Práctico e Interactivo</p>
+                </div>
+                <div class="p-3">
+                    <p class="font-serif text-2xl sm:text-3xl font-bold text-chess-gold">Táctica</p>
+                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Patrones Clave</p>
+                </div>
+                <div class="p-3">
+                    <p class="font-serif text-2xl sm:text-3xl font-bold text-chess-gold">Aperturas</p>
+                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Repertorio Sólido</p>
+                </div>
+                <div class="p-3">
+                    <p class="font-serif text-2xl sm:text-3xl font-bold text-chess-gold">Finales</p>
+                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Técnica de Precisión</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE CARACTERÍSTICAS / DESTACADOS -->
+        <section id="caracteristicas" class="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
+            <div class="text-center mb-16">
+                <h2 class="font-serif text-3xl sm:text-4xl font-bold text-chess-ivory mb-4">
+                    ¿Qué Aprenderás en el <span class="text-gold-gradient">Taller</span>?
+                </h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-transparent via-chess-gold to-transparent mx-auto"></div>
+                <p class="text-gray-400 mt-4 max-w-2xl mx-auto text-sm sm:text-base">
+                    Diseñado metódicamente para transformar tu forma de pensar y analizar cada posición en el tablero.
+                </p>
+            </div>
+
+            <!-- Grilla de Tarjetas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Tarjeta 1: Táctica -->
+                <div class="bg-chess-card rounded-2xl p-6 gold-border-glow flex flex-col justify-between group">
+                    <div>
+                        <div class="w-14 h-14 rounded-xl bg-chess-gold/10 border border-chess-gold/30 flex items-center justify-center text-3xl text-chess-gold mb-6 group-hover:bg-chess-gold group-hover:text-chess-dark transition-colors duration-300">
+                            ♞
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-chess-ivory mb-3 group-hover:text-chess-gold transition-colors">
+                            Táctica y Combinaciones
+                        </h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                            Identifica clavadas, tenedores, ataques descubiertos y sacrificios devastadores. Reconoce patrones al instante.
+                        </p>
+                    </div>
+                    <div class="text-xs font-semibold text-chess-gold flex items-center gap-2">
+                        <span>Ver Ejercicios</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Aperturas -->
+                <div class="bg-chess-card rounded-2xl p-6 gold-border-glow flex flex-col justify-between group">
+                    <div>
+                        <div class="w-14 h-14 rounded-xl bg-chess-gold/10 border border-chess-gold/30 flex items-center justify-center text-3xl text-chess-gold mb-6 group-hover:bg-chess-gold group-hover:text-chess-dark transition-colors duration-300">
+                            ♝
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-chess-ivory mb-3 group-hover:text-chess-gold transition-colors">
+                            Teoría de Aperturas
+                        </h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                            Comprende los principios fundamentales del control del centro, desarrollo rápido y seguridad del rey desde el primer movimiento.
+                        </p>
+                    </div>
+                    <div class="text-xs font-semibold text-chess-gold flex items-center gap-2">
+                        <span>Ver Repertorio</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Finales -->
+                <div class="bg-chess-card rounded-2xl p-6 gold-border-glow flex flex-col justify-between group">
+                    <div>
+                        <div class="w-14 h-14 rounded-xl bg-chess-gold/10 border border-chess-gold/30 flex items-center justify-center text-3xl text-chess-gold mb-6 group-hover:bg-chess-gold group-hover:text-chess-dark transition-colors duration-300">
+                            ♜
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-chess-ivory mb-3 group-hover:text-chess-gold transition-colors">
+                            Estrategia en Finales
+                        </h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                            Convierte ventajas mínimas en victorias contundentes. Domina la regla del cuadrado, la oposición y los finales de torre.
+                        </p>
+                    </div>
+                    <div class="text-xs font-semibold text-chess-gold flex items-center gap-2">
+                        <span>Estudiar Finales</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 4: Desafíos -->
+                <div class="bg-chess-card rounded-2xl p-6 gold-border-glow flex flex-col justify-between group">
+                    <div>
+                        <div class="w-14 h-14 rounded-xl bg-chess-gold/10 border border-chess-gold/30 flex items-center justify-center text-3xl text-chess-gold mb-6 group-hover:bg-chess-gold group-hover:text-chess-dark transition-colors duration-300">
+                            ♛
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-chess-ivory mb-3 group-hover:text-chess-gold transition-colors">
+                            Desafíos Interactivos
+                        </h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                            Pon a prueba tus conocimientos con problemas interactivos adaptativos en tiempo real con pistas y soluciones paso a paso.
+                        </p>
+                    </div>
+                    <div class="text-xs font-semibold text-chess-gold flex items-center gap-2">
+                        <span>Iniciar Desafíos</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE CITA HISTÓRICA / INSPIRACIÓN -->
+        <section id="filosofia" class="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+            <div class="bg-gradient-to-r from-chess-card via-[#161c28] to-chess-card p-8 sm:p-12 rounded-3xl border border-chess-gold/20 text-center relative overflow-hidden shadow-2xl">
+                <!-- Marca de agua icono de ajedrez -->
+                <span class="absolute -bottom-10 -right-6 text-9xl text-chess-gold/5 font-serif select-none">♚</span>
+                
+                <i class="fa-solid fa-quote-left text-3xl text-chess-gold/40 mb-6 block"></i>
+                <blockquote class="font-serif text-xl sm:text-2xl lg:text-3xl font-medium text-chess-ivory italic leading-relaxed mb-6">
+                    "El Ajedrez es la lucha contra el error. Todo depende de cuán profundamente veas en la posición."
+                </blockquote>
+                <cite class="text-chess-gold font-semibold tracking-widest text-sm uppercase not-italic block">
+                    — Johannes Zukertort
+                </cite>
+            </div>
+        </section>
+
+        <!-- BANNER DE LLAMADO FINAL A LA ACCIÓN -->
+        <section id="beneficios" class="py-16 md:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="bg-gradient-to-b from-chess-boardDark to-chess-dark rounded-3xl p-8 sm:p-12 border border-chess-gold/30 text-center relative overflow-hidden">
+                <div class="max-w-3xl mx-auto relative z-10">
+                    <span class="text-5xl mb-4 block">♟️</span>
+                    <h2 class="font-serif text-3xl sm:text-5xl font-bold text-chess-ivory mb-6">
+                        ¿Listo para hacer tu <span class="text-gold-gradient">Mejor Movimiento</span>?
+                    </h2>
+                    <p class="text-gray-300 text-base sm:text-lg mb-8 leading-relaxed">
+                        Ingresa al taller interactivo ahora mismo y comienza a perfeccionar tu juego sin costo alguno.
+                    </p>
+                    <a href="taller_interactivo_ajedrez.html" 
+                       class="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-serif text-base sm:text-lg font-bold text-chess-dark cta-btn-gold uppercase tracking-wider">
+                        <span>Comenzar Entrenamiento</span>
+                        <i class="fa-solid fa-play text-sm"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PIE DE PÁGINA (FOOTER) -->
+    <footer class="relative z-20 border-t border-chess-gold/15 bg-chess-dark py-10 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl text-chess-gold">♚</span>
+                <span class="font-serif font-bold text-sm text-chess-ivory tracking-wider">
+                    TALLER INTERACTIVO DE AJEDREZ
+                </span>
+            </div>
+            
+            <p class="text-xs text-gray-500 text-center">
+                &copy; Taller Interactivo de Ajedrez. Diseñado para apasionados del ajedrez y la estrategia.
+            </p>
+
+            <div class="flex items-center gap-4 text-gray-400 text-sm">
+                <a href="taller_interactivo_ajedrez.html" class="hover:text-chess-gold transition-colors">Taller</a>
+                <span>•</span>
+                <a href="#caracteristicas" class="hover:text-chess-gold transition-colors">Contenido</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
